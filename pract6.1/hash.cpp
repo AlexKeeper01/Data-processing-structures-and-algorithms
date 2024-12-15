@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <locale>
+#include <Windows.h>
 
 using namespace std;
 
@@ -127,7 +127,8 @@ void userInterface(HashTable& hashTable) {
             cout << "\nВведите номер телефона: ";
             cin >> phoneNumber;
             cout << "\nВведите адрес владельца: ";
-            cin >> ownerAddress;
+            cin.ignore();
+            getline(cin, ownerAddress);
             hashTable.insert(phoneNumber, ownerAddress);
             break;
         }
@@ -160,7 +161,8 @@ void userInterface(HashTable& hashTable) {
 }
 
 int main() {
-    setlocale(LC_ALL, "Russian");
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
     HashTable hashTable;
     hashTable.insert(9154318262, "ул. Шолохова, дом 5, кв 43");
     hashTable.insert(9164587270, "ул. Лукинская, дом 1, кв 321");
