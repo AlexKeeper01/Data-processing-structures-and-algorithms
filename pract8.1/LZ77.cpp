@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <Windows.h>
 
 using namespace std;
 
@@ -52,13 +53,15 @@ vector<LZ77Triplet> encodeLZ77(const string& input, int searchBufferSize, int lo
 }
 
 int main() {
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
     string input = "0001000010101001101";
     int searchBufferSize = 5;
     int lookaheadBufferSize = 5;
 
     vector<LZ77Triplet> compressed = encodeLZ77(input, searchBufferSize, lookaheadBufferSize);
 
-    cout << "Compressed data (offset, length, nextChar):" << endl;
+    cout << "Результат сжатия информации (offset, length, nextChar):" << endl;
     for (const auto& triplet : compressed) {
         cout << "(" << triplet.offset << ", " << triplet.length << ", "
             << (triplet.nextChar ? triplet.nextChar : '-') << ") ";
