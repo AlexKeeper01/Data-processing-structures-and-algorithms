@@ -23,8 +23,17 @@ int splitSymbols(vector<Symbol>& symbols, int start, int end) {
 
     for (int i = start; i <= end; i++) {
         sum += symbols[i].frequency;
-        if (sum >= half)
-            return i;
+        if (sum >= half) {
+            if (sum - half <= half - (sum - symbols[i].frequency)) {
+                return i;
+            }
+            else {
+                if (i - 1 >= start) {
+                    return i - 1;
+                }
+                return i;
+            }
+        }
     }
     return start;
 }
