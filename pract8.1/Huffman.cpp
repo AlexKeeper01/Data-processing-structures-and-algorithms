@@ -22,7 +22,7 @@ struct Node {
     Node* left;
     Node* right;
 
-    Node(char ch, int freq, int p) : character(ch), frequency(freq), left(nullptr), right(nullptr), pos(p) {}
+    Node(char ch, int freq, int p) : character(ch), frequency(freq), left(nullptr), right(nullptr) {}
 };
 
 // Обход дерева для назначения кодов символам
@@ -54,31 +54,31 @@ string buildHuffmanTree(const string& input, vector<Symbol>& symbols) {
         nodes.push_back(new Node(symbol.character, symbol.frequency, 0));
     }
 
-    sort(nodes.begin(), nodes.end(), [](Node* a, Node* b) { return a->frequency < b->frequency; });
-
-    int i = 0;
     for (auto& node : nodes) {
-        node->pos = i++;
+        node->pos = input.find(node->character);
     }
 
     while (nodes.size() > 1) {
-        sort(nodes.begin(), nodes.end(), [](Node* a, Node* b) {
-            if (a->frequency == b->frequency)
-                return a->pos < b->pos;
-            return a->frequency < b->frequency;
-            });
+        sort(nodes.begin(), nodes.end(), [&](Node* a, Node* b) {
+            if (a->frequency == b->frequency) {
+                return a->pos > b->pos;
+            }
+            else {
+                return a->frequency < b->frequency;
+            }});
+
         Node* left = nodes[0];
         Node* right = nodes[1];
 
         Node* combined = new Node('\0', left->frequency + right->frequency, 0);
         combined->left = left;
         combined->right = right;
-        if (left->frequency >= right->frequency) {
+        if (left->frequency > right->frequency) {
             combined->pos = left->pos;
-        } else {
+        }
+        else {
             combined->pos = right->pos;
         }
-
         nodes.erase(nodes.begin(), nodes.begin() + 2);
         nodes.push_back(combined);
     }
@@ -91,14 +91,22 @@ string buildHuffmanTree(const string& input, vector<Symbol>& symbols) {
     return compressString(input, huffmanCodes);
 }
 
-void printTableWithCodes(vector<Symbol>& symbols) {
+void printTableWithCodes(vector<Symbol>& symbols, const string& input) {
     cout << setw(9) << "Символ" << setw(11) << "Частота" << setw(16) << "Вероятность" << setw(20) << "Код" << endl;
     cout << string(60, '-') << endl;
 
     sort(symbols.begin(), symbols.end(), [&](const Symbol& a, const Symbol& b) {
-        if (a.probability == b.probability)
-            return (a.code).size() < (b.code).size();
-        return a.probability > b.probability; });
+        if (a.probability == b.probability) {
+            if ((a.code).size() == (b.code).size()) {
+                return input.find(a.character) < input.find(b.character);
+            }
+            else {
+                return (a.code).size() < (b.code).size();
+            }
+        }
+        else {
+            return a.probability > b.probability;
+        }});
 
     for (auto& symbol : symbols) {
         cout << setw(5) << "'" << symbol.character << "'"
@@ -137,7 +145,7 @@ int main() {
 
     string encodedText = buildHuffmanTree(input, symbols);
 
-    printTableWithCodes(symbols);
+    printTableWithCodes(symbols, input);
 
     cout << "\nСжатая строка: " << encodedText << endl;
 
