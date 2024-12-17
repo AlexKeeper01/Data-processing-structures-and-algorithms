@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <Windows.h>
 #include <cmath>
+#include <set>
 
 using namespace std;
 
@@ -45,7 +46,27 @@ string compressString(const string& input, const unordered_map<char, string>& hu
     return compressed;
 }
 
-string buildHuffmanTree(const string& input, vector<Symbol>& symbols) {
+vector<Symbol> calculateFreqAndProb(const string& input) {
+    unordered_map<char, int> frequencies;
+    int total_chars = input.size();
+    for (char ch : input) {
+        frequencies[ch]++;
+    }
+
+    vector<Symbol> symbols;
+    for (const auto& pair : frequencies) {
+        Symbol symbol;
+        symbol.character = pair.first;
+        symbol.frequency = pair.second;
+        symbol.probability = static_cast<double>(pair.second) / total_chars;
+        symbols.push_back(symbol);
+    }
+
+    return symbols;
+}
+
+string encodeHuffman(const string& input, vector<Symbol>& symbols) {
+    
     vector<Node*> nodes;
     for (const auto& symbol : symbols) {
         nodes.push_back(new Node(symbol.character, symbol.frequency, 0));
@@ -108,23 +129,17 @@ void printTableWithCodes(vector<Symbol>& symbols, const string& input) {
         }
 }
 
-vector<Symbol> calculateFreqAndProb(const string& input) {
-    unordered_map<char, int> frequencies;
-    int total_chars = input.size();
-    for (char ch : input) {
-        frequencies[ch]++;
-    }
-
-    vector<Symbol> symbols;
-    for (const auto& pair : frequencies) {
-        Symbol symbol;
-        symbol.character = pair.first;
-        symbol.frequency = pair.second;
-        symbol.probability = static_cast<double>(pair.second) / total_chars;
-        symbols.push_back(symbol);
-    }
-
-    return symbols;
+void calculateCompressionRation(const string& input, vector<Symbol>& symbols) {
+    int ASCII_length = input.size() * 8;
+    set<char> uniqueChars;
+    for (char c : input)
+        uniqueChars.insert(c);
+    int Uniform_length = input.size() * (log(uniqueChars.size()) / log(2));
+    int Encoded_length = encodeHuffman(input, symbols).size();
+    cout << "Коэффицент сжатия относительно кодировки ASCII:\n";
+    cout << double(ASCII_length) / Encoded_length << endl;
+    cout << "Коэффицент сжатия относительно равномерного кода:\n";
+    cout << double(Uniform_length) / Encoded_length << endl;
 }
 
 int main() {
@@ -132,14 +147,15 @@ int main() {
     SetConsoleOutputCP(1251);
 
     string input = "попов алексей валерьевич";
-
     vector<Symbol> symbols = calculateFreqAndProb(input);
 
-    string encodedText = buildHuffmanTree(input, symbols);
+    string encodedText = encodeHuffman(input, symbols);
 
     printTableWithCodes(symbols, input);
 
     cout << "\nСжатая строка: " << encodedText << endl;
+
+    calculateCompressionRation(input, symbols);
 
     return 0;
 }
