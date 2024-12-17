@@ -5,8 +5,6 @@
 #include <unordered_map>
 #include <algorithm>
 #include <Windows.h>
-#include <cctype>
-#include <bitset>
 
 using namespace std;
 
@@ -56,9 +54,10 @@ void shannonFano(vector<Symbol>& symbols, int start, int end) {
     shannonFano(symbols, split + 1, end);
 }
 
-unordered_map<char, string> encodeShannonFano(const string& text, vector<Symbol>& symbols) {
+string encodeShannonFano(const string& originalText, vector<Symbol>& symbols) {
     unordered_map<char, int> frequencyMap;
-    for (char ch : text)
+    string result;
+    for (char ch : originalText)
         frequencyMap[ch]++;
 
     for (const auto& pair : frequencyMap)
@@ -68,11 +67,41 @@ unordered_map<char, string> encodeShannonFano(const string& text, vector<Symbol>
 
     shannonFano(symbols, 0, symbols.size() - 1);
 
-    unordered_map<char, string> codeMap;
-    for (const Symbol& symbol : symbols)
-        codeMap[symbol.character] = symbol.code;
+    unordered_map<char, string> symbolMap;
+    for (const Symbol& symbol : symbols) {
+        symbolMap[symbol.character] = symbol.code;
+    }
 
-    return codeMap;
+    for (char ch : originalText) {
+        for (const Symbol& symbol : symbols) {
+            if (symbol.character == ch) {
+                result += symbol.code;
+            }
+        }
+    }
+
+    return result;
+}
+
+string decodeShannonFano(const string& encodedText, vector<Symbol>& symbols) {
+    unordered_map<string, char> reverseCodeMap;
+    for (const Symbol& symbol : symbols) {
+        reverseCodeMap[symbol.code] = symbol.character;
+    }
+
+    string decodedText;
+    string currentCode;
+
+    for (char bit : encodedText) {
+        currentCode += bit;
+
+        if (reverseCodeMap.find(currentCode) != reverseCodeMap.end()) {
+            decodedText += reverseCodeMap[currentCode];
+            currentCode.clear();
+        }
+    }
+
+    return decodedText;
 }
 
 void printPrefixTree(vector<Symbol>& symbols) {
@@ -91,13 +120,6 @@ void printPrefixTree(vector<Symbol>& symbols) {
     cout << endl;
 }
 
-void printCode(const string& text, const unordered_map<char, string>& codeMap) {
-    cout << "\nЗакодированная строка: ";
-    for (char ch : text)
-        cout << codeMap.at(ch);
-    cout << endl;
-}
-
 string ParseFile(const string& name) {
     ifstream inputFile(name);
     if (!inputFile) {
@@ -110,12 +132,10 @@ string ParseFile(const string& name) {
     return text;
 }
 
-void calculateCompressionRatio(const string& text, const unordered_map<char, string>& codeMap) {
-    int original_size = text.size() * 8;
-    int encoded_size = 0;
-    cout << "\nКоэффицент сжатия: ";
-    for (char ch : text)
-        encoded_size += codeMap.at(ch).size();
+void calculateCompressionRatio(const string& originalText, const string& encodedText) {
+    int original_size = originalText.size() * 8;
+    int encoded_size = encodedText.size();
+    cout << "\nКоэффицент сжатия: " << endl;
     cout << double(original_size) / double(encoded_size) << endl;
 }
 
@@ -123,14 +143,16 @@ int main() {
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
 
-    string all_text = ParseFile("input.txt");
+    string originalText = ParseFile("input.txt");
     vector<Symbol> symbols;
 
-    unordered_map<char, string> codeMap = encodeShannonFano(all_text, symbols);
+    string encodedText = encodeShannonFano(originalText, symbols);
 
     printPrefixTree(symbols);
 
-    calculateCompressionRatio(all_text, codeMap);
+    calculateCompressionRatio(originalText, encodedText);
+
+    cout << decodeShannonFano(encodedText, symbols);
 
     return 0;
 }
