@@ -22,11 +22,11 @@ struct Node {
     Node* left;
     Node* right;
 
-    Node(char ch, int freq, int p) : character(ch), frequency(freq), left(nullptr), right(nullptr) {}
+    Node(char ch, int freq, int p) : character(ch), frequency(freq), left(nullptr), right(nullptr), pos(p) {}
 };
 
 // Обход дерева для назначения кодов символам
-void assignCodes(Node* root, unordered_map<char, string>& huffmanCodes, string code="") {
+void assignCodes(Node* root, unordered_map<char, string>& huffmanCodes, string code = "") {
     if (!root) return;
 
     // Если это лист, сохранить код
@@ -34,7 +34,6 @@ void assignCodes(Node* root, unordered_map<char, string>& huffmanCodes, string c
         huffmanCodes[root->character] = code;
     }
 
-    
     assignCodes(root->left, huffmanCodes, code + "0");
     assignCodes(root->right, huffmanCodes, code + "1");
 }
@@ -67,20 +66,15 @@ string buildHuffmanTree(const string& input, vector<Symbol>& symbols) {
                 return a->frequency < b->frequency;
             }});
 
-        Node* left = nodes[0];
-        Node* right = nodes[1];
+            Node* left = nodes[0];
+            Node* right = nodes[1];
 
-        Node* combined = new Node('\0', left->frequency + right->frequency, 0);
-        combined->left = left;
-        combined->right = right;
-        if (left->frequency > right->frequency) {
-            combined->pos = left->pos;
-        }
-        else {
-            combined->pos = right->pos;
-        }
-        nodes.erase(nodes.begin(), nodes.begin() + 2);
-        nodes.push_back(combined);
+            Node* combined = new Node('\0', left->frequency + right->frequency, 0);
+            combined->left = left;
+            combined->right = right;
+            combined->pos = max(left->pos, right->pos);
+            nodes.erase(nodes.begin(), nodes.begin() + 2);
+            nodes.push_back(combined);
     }
 
     unordered_map<char, string> huffmanCodes;
@@ -108,12 +102,12 @@ void printTableWithCodes(vector<Symbol>& symbols, const string& input) {
             return a.probability > b.probability;
         }});
 
-    for (auto& symbol : symbols) {
-        cout << setw(5) << "'" << symbol.character << "'"
-            << setw(10) << symbol.frequency
-            << setw(15) << symbol.probability
-            << setw(24) << symbol.code << endl;
-    }
+        for (auto& symbol : symbols) {
+            cout << setw(5) << "'" << symbol.character << "'"
+                << setw(10) << symbol.frequency
+                << setw(15) << symbol.probability
+                << setw(24) << symbol.code << endl;
+        }
 }
 
 vector<Symbol> calculateFrequencies(const string& input) {
