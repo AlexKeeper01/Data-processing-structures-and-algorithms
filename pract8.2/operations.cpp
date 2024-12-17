@@ -14,7 +14,7 @@ bool isValid(const vector<int>& sequence) {
     return true;
 }
 
-int bruteForceCount(int n, int& bruteForceOperations) {
+int bfCount(int n, int& bfOperations) {
     int total = 0;
     int combinations = pow(2, n);
 
@@ -23,7 +23,7 @@ int bruteForceCount(int n, int& bruteForceOperations) {
         for (int j = 0; j < n; ++j) {
             sequence.push_back((i >> j) & 1);
         }
-        bruteForceOperations++;
+        bfOperations++;
         if (isValid(sequence)) {
             total++;
         }
@@ -31,7 +31,7 @@ int bruteForceCount(int n, int& bruteForceOperations) {
     return total;
 }
 
-int countSequences(int n, int& dpOperations) {
+int dpCount(int n, int& dpOperations) {
     if (n == 1) return 2;
     if (n == 2) return 3;
 
@@ -62,12 +62,12 @@ int main() {
     int bfOperations = 0;
     int dpOperations = 0;
 
-    int resultDP = countSequences(n, dpOperations);
+    int resultDP = dpCount(n, dpOperations);
     cout << "Динамическое программирование:\n";
     cout << "Количество последовательностей: " << resultDP << endl;
     cout << "Количество операций: " << dpOperations << endl;
 
-    int resultBF = bruteForceCount(n, bfOperations);
+    int resultBF = bfCount(n, bfOperations);
     cout << "\nПолный перебор:\n";
     cout << "Количество последовательностей: " << resultBF << endl;
     cout << "Количество операций: " << bfOperations << endl;
