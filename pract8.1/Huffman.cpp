@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <Windows.h>
+#include <cmath>
 
 using namespace std;
 
@@ -25,11 +26,9 @@ struct Node {
     Node(char ch, int freq, int p) : character(ch), frequency(freq), left(nullptr), right(nullptr), pos(p) {}
 };
 
-// Обход дерева для назначения кодов символам
 void assignCodes(Node* root, unordered_map<char, string>& huffmanCodes, string code = "") {
     if (!root) return;
 
-    // Если это лист, сохранить код
     if (root->character != '\0') {
         huffmanCodes[root->character] = code;
     }
@@ -38,7 +37,6 @@ void assignCodes(Node* root, unordered_map<char, string>& huffmanCodes, string c
     assignCodes(root->right, huffmanCodes, code + "1");
 }
 
-// Функция сжатия строки
 string compressString(const string& input, const unordered_map<char, string>& huffmanCodes) {
     string compressed;
     for (char ch : input) {
@@ -110,7 +108,7 @@ void printTableWithCodes(vector<Symbol>& symbols, const string& input) {
         }
 }
 
-vector<Symbol> calculateFrequencies(const string& input) {
+vector<Symbol> calculateFreqAndProb(const string& input) {
     unordered_map<char, int> frequencies;
     int total_chars = input.size();
     for (char ch : input) {
@@ -122,7 +120,7 @@ vector<Symbol> calculateFrequencies(const string& input) {
         Symbol symbol;
         symbol.character = pair.first;
         symbol.frequency = pair.second;
-        symbol.probability = static_cast<int>((static_cast<double>(pair.second) / total_chars) * 100) / 100.0;
+        symbol.probability = static_cast<double>(pair.second) / total_chars;
         symbols.push_back(symbol);
     }
 
@@ -133,9 +131,9 @@ int main() {
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
 
-    string input = "пупкин василий кириллович";
+    string input = "попов алексей валерьевич";
 
-    vector<Symbol> symbols = calculateFrequencies(input);
+    vector<Symbol> symbols = calculateFreqAndProb(input);
 
     string encodedText = buildHuffmanTree(input, symbols);
 
