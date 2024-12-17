@@ -46,27 +46,7 @@ string compressString(const string& input, const unordered_map<char, string>& hu
     return compressed;
 }
 
-vector<Symbol> calculateFreqAndProb(const string& input) {
-    unordered_map<char, int> frequencies;
-    int total_chars = input.size();
-    for (char ch : input) {
-        frequencies[ch]++;
-    }
-
-    vector<Symbol> symbols;
-    for (const auto& pair : frequencies) {
-        Symbol symbol;
-        symbol.character = pair.first;
-        symbol.frequency = pair.second;
-        symbol.probability = static_cast<double>(pair.second) / total_chars;
-        symbols.push_back(symbol);
-    }
-
-    return symbols;
-}
-
 string encodeHuffman(const string& input, vector<Symbol>& symbols) {
-    
     vector<Node*> nodes;
     for (const auto& symbol : symbols) {
         nodes.push_back(new Node(symbol.character, symbol.frequency, 0));
@@ -102,6 +82,25 @@ string encodeHuffman(const string& input, vector<Symbol>& symbols) {
         symbol.code = huffmanCodes.at(symbol.character);
     }
     return compressString(input, huffmanCodes);
+}
+
+vector<Symbol> calculateFreqAndProb(const string& input) {
+    unordered_map<char, int> frequencies;
+    int total_chars = input.size();
+    for (char ch : input) {
+        frequencies[ch]++;
+    }
+
+    vector<Symbol> symbols;
+    for (const auto& pair : frequencies) {
+        Symbol symbol;
+        symbol.character = pair.first;
+        symbol.frequency = pair.second;
+        symbol.probability = static_cast<double>(pair.second) / total_chars;
+        symbols.push_back(symbol);
+    }
+
+    return symbols;
 }
 
 void printTableWithCodes(vector<Symbol>& symbols, const string& input) {
@@ -142,6 +141,18 @@ void calculateCompressionRation(const string& input, vector<Symbol>& symbols) {
     cout << double(Uniform_length) / Encoded_length << endl;
 }
 
+void calculateAvgLengthAndDispersion(vector<Symbol>& symbols) {
+    double averageLength = 0;
+    double dispersion = 0;
+    for (auto& symbol : symbols) {
+        averageLength += symbol.probability * (symbol.code).size();
+    }
+    for (auto& symbol : symbols) {
+        dispersion += symbol.probability * pow((symbol.code).size() - averageLength, 2);
+    }
+    cout << "Средняя длина кода: " << averageLength << endl << "Дисперсия кода: " << dispersion << endl;
+}
+
 int main() {
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
@@ -153,9 +164,9 @@ int main() {
 
     printTableWithCodes(symbols, input);
 
-    cout << "\nСжатая строка: " << encodedText << endl;
+    cout << endl;
 
-    calculateCompressionRation(input, symbols);
+    calculateAvgLengthAndDispersion(symbols);
 
     return 0;
 }
